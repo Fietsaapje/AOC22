@@ -6,108 +6,31 @@ using System.Text.RegularExpressions;
 
 namespace AOC21
 {
-    class Dir
-    {
-        public Dir(string name, Dir parent)
-        {
-            this.Name = name;
-            this.ParentDir = parent;
-        }
 
-        public string Name;
-        public Dir ParentDir;
-        public List<Dir> Dirs = new List<Dir>();
-        private int size = 0;
-
-        public int Size
-        {
-            get
-            {
-                int i = 0;
-
-                foreach (Dir dir in Dirs)
-                    i += dir.Size;
-
-                return i + size;
-            }
-        }
-
-        public void AddDir(Dir dir)
-        {
-            Dirs.Add(dir);
-        }
-
-        public void AddSize(int amount)
-        {
-            size += amount;
-        }
-    }
     class Program
     {
-        private static int Day = 7;
         static void Main(string[] args)
         {
-            string[] input = ReadFileStrings(Day);
+            string[] input;
+            DateTime before;
 
-            var before = DateTime.Now;
+            //Day 6
+            input = ReadFileStrings(6);
+            before = DateTime.Now;
 
-            Console.WriteLine(AOCD7(input));
+            Console.WriteLine(Day6.GetAnswer(input));
 
-            Console.WriteLine(DateTime.Now - before);
+            Console.WriteLine($"Running time:{ DateTime.Now - before}");
+
+            //Day 7
+            input = ReadFileStrings(7);
+            before = DateTime.Now;
+
+            Console.WriteLine(Day7.GetAnswer(input));
+
+            Console.WriteLine($"Running time:{ DateTime.Now - before}");
         }
 
-        public static string AOCD7(string[] input)
-        {
-            int totaldiskspace = 70000000;
-            int requiredspace = 30000000;
-
-            Dir active = new Dir("/", null);
-            List<Dir> alldirs = new List<Dir>();
-
-            for (int i = 1; i < input.Length; i++)
-            {
-                if (input[i][0] == '$')
-                    if(input[i][2] == 'c')
-                    {
-                        if (input[i][5] == '.')
-                            active = active.ParentDir;
-                        else
-                            active = active.Dirs.First(d => d.Name == input[i].Split(' ')[2]);
-                    }
-                    else if (input[i][2] == 'l')
-                    {
-                        while (i+1 < input.Length)
-                        {
-                            if (input[i + 1][0] == '$')
-                                break;
-
-                            i++;
-                            if (input[i][0] == 'd')
-                            {
-                                active.AddDir(new Dir(input[i].Split(' ')[1], active));
-                            }
-                            else
-                            {
-                                active.AddSize(Int32.Parse(input[i].Split(' ')[0]));
-                            }
-                        }   
-                        alldirs.Add(active);
-                    }
-            }
-
-            int total = 0;
-
-            var smalldirs = alldirs.Where(d => d.Size <= 100000);
-            foreach(var smalldir in smalldirs)
-                total += smalldir.Size;
-
-
-            int spacetoclear = requiredspace - (totaldiskspace - alldirs.FirstOrDefault(d => d.Name == "/").Size);
-            int smallestsize = alldirs.Where(d => d.Size >= spacetoclear).Min(d => d.Size);
-
-            return $"The directories < 100000 combine to a size of {total}, the size of the dir to remove is {smallestsize} ";
-
-        }
 
 
         public static int AOCD1v1(int day)
@@ -298,28 +221,6 @@ namespace AOC21
 
             return result;
         }
-
-        public static string AOCD6(string[] inputunprocessed)
-        {
-            int markersize = 14;
-            char[] input = inputunprocessed[0].ToCharArray();
-
-            for (int i = 0; i < input.Length - markersize; i++)
-            {
-                //create and fill subarray of markersize
-                char[] sub = new char[markersize];
-                for (int j = 0; j < markersize; j++)
-                    sub[j] = input[i + j];
-
-                //check for [markersize] distinct values within subarray
-                if (sub.Distinct().Count() == markersize)
-                    return $"Marker found at index {i + markersize}";
-
-            }
-
-            return "Not found";
-        }
-
 
         public static string[] ReadFileStrings(int day)
         {
