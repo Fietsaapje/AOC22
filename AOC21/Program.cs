@@ -51,52 +51,61 @@ namespace AOC21
 
             var before = DateTime.Now;
 
-            Console.WriteLine(AOCD7_1(input));
+            Console.WriteLine(AOCD7(input));
 
             Console.WriteLine(DateTime.Now - before);
         }
 
-        public static string AOCD7_1(string[] input)
+        public static string AOCD7(string[] input)
         {
+            int totaldiskspace = 70000000;
+            int requiredspace = 30000000;
 
             Dir active = new Dir("/", null);
+            List<Dir> alldirs = new List<Dir>();
 
             for (int i = 1; i < input.Length; i++)
             {
                 if (input[i][0] == '$')
-                    switch (input[i][2])
+                    if(input[i][2] == 'c')
                     {
-                        case 'c':
-                            switch (input[i][5])
-                            {
-                                case '.':
-                                    active = active.ParentDir;
-                                    break;
-                                default:
-                                    active = active.Dirs.First(d => d.Name == input[i].Split(' ')[2]);
-                                    break;
-                            }
-                            break;
-                        case 'l':
-                            i++;
-                            while (true)
-                            {
-                                if (input[i++][0] == 'd')
-                                    active.AddDir(new Dir(input[i].Split(' ')[1], active));
-                                else if (input[i++][0] == '$')
-                                    break;
-                                else
-                                    active.AddSize(Int32.Parse(input[i++].Split(' ')[0]));
+                        if (input[i][5] == '.')
+                            active = active.ParentDir;
+                        else
+                            active = active.Dirs.First(d => d.Name == input[i].Split(' ')[2]);
+                    }
+                    else if (input[i][2] == 'l')
+                    {
+                        while (i+1 < input.Length)
+                        {
+                            if (input[i + 1][0] == '$')
+                                break;
 
+                            i++;
+                            if (input[i][0] == 'd')
+                            {
+                                active.AddDir(new Dir(input[i].Split(' ')[1], active));
                             }
-                            break;
-                        default:
-                            //unrecognized command
-                            break;
+                            else
+                            {
+                                active.AddSize(Int32.Parse(input[i].Split(' ')[0]));
+                            }
+                        }   
+                        alldirs.Add(active);
                     }
             }
 
-            return $"The answer is{active.Size}";
+            int total = 0;
+
+            var smalldirs = alldirs.Where(d => d.Size <= 100000);
+            foreach(var smalldir in smalldirs)
+                total += smalldir.Size;
+
+
+            int spacetoclear = requiredspace - (totaldiskspace - alldirs.FirstOrDefault(d => d.Name == "/").Size);
+            int smallestsize = alldirs.Where(d => d.Size >= spacetoclear).Min(d => d.Size);
+
+            return $"The directories < 100000 combine to a size of {total}, the size of the dir to remove is {smallestsize} ";
 
         }
 
@@ -314,7 +323,7 @@ namespace AOC21
 
         public static string[] ReadFileStrings(int day)
         {
-            string text = System.IO.File.ReadAllText(@"C:\Users\jpulles\Documents\AOC\" + day + ".txt");
+            string text = System.IO.File.ReadAllText(@"C:\\aoc\\" + day + ".txt");
             string[] textsplit = text.Split("\n");
             Array.Resize(ref textsplit, textsplit.Length - 1);
             return textsplit;
