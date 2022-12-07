@@ -6,18 +6,101 @@ using System.Text.RegularExpressions;
 
 namespace AOC21
 {
+    class Dir
+    {
+        public Dir(string name, Dir parent)
+        {
+            this.Name = name;
+            this.ParentDir = parent;
+        }
+
+        public string Name;
+        public Dir ParentDir;
+        public List<Dir> Dirs = new List<Dir>();
+        private int size = 0;
+
+        public int Size
+        {
+            get
+            {
+                int i = 0;
+
+                foreach (Dir dir in Dirs)
+                    i += dir.Size;
+
+                return i + size;
+            }
+        }
+
+        public void AddDir(Dir dir)
+        {
+            Dirs.Add(dir);
+        }
+
+        public void AddSize(int amount)
+        {
+            size += amount;
+        }
+    }
     class Program
     {
-        private static int Day = 6;
+        private static int Day = 7;
         static void Main(string[] args)
         {
+            string[] input = ReadFileStrings(Day);
+
             var before = DateTime.Now;
 
-            Console.WriteLine(AOCD6());
+            Console.WriteLine(AOCD7_1(input));
 
             Console.WriteLine(DateTime.Now - before);
         }
-        
+
+        public static string AOCD7_1(string[] input)
+        {
+
+            Dir active = new Dir("/", null);
+
+            for (int i = 1; i < input.Length; i++)
+            {
+                if (input[i][0] == '$')
+                    switch (input[i][2])
+                    {
+                        case 'c':
+                            switch (input[i][5])
+                            {
+                                case '.':
+                                    active = active.ParentDir;
+                                    break;
+                                default:
+                                    active = active.Dirs.First(d => d.Name == input[i].Split(' ')[2]);
+                                    break;
+                            }
+                            break;
+                        case 'l':
+                            i++;
+                            while (true)
+                            {
+                                if (input[i++][0] == 'd')
+                                    active.AddDir(new Dir(input[i].Split(' ')[1], active));
+                                else if (input[i++][0] == '$')
+                                    break;
+                                else
+                                    active.AddSize(Int32.Parse(input[i++].Split(' ')[0]));
+
+                            }
+                            break;
+                        default:
+                            //unrecognized command
+                            break;
+                    }
+            }
+
+            return $"The answer is{active.Size}";
+
+        }
+
+
         public static int AOCD1v1(int day)
         {
             int biggest = 0;
@@ -94,7 +177,7 @@ namespace AOC21
 
             for (int i = 0; i < input.Length; i++)
             {
-                if(input[i][2] == 'X')
+                if (input[i][2] == 'X')
                 {
                     myscore += input[i][0] == 'A' ? 3 : 0;
                     myscore += input[i][0] == 'B' ? 1 : 0;
@@ -139,12 +222,12 @@ namespace AOC21
 
                 //process instruction to int array
                 string[] strings = Regex.Split(input[i], @"\D+");
-                int[] numbers = new int[3];       
+                int[] numbers = new int[3];
                 for (int j = 0; j < numbers.Length; j++)
-                    numbers[j] = int.Parse(strings[j+1]);
+                    numbers[j] = int.Parse(strings[j + 1]);
 
                 //execute instruction
-                for (int j = 0; j < numbers[0]; j++)          
+                for (int j = 0; j < numbers[0]; j++)
                     stacks[numbers[2]].Push(stacks[numbers[1]].Pop());
 
             }
@@ -207,12 +290,12 @@ namespace AOC21
             return result;
         }
 
-        public static string AOCD6()
+        public static string AOCD6(string[] inputunprocessed)
         {
             int markersize = 14;
-            char[] input = ReadFileStrings(6)[0].ToCharArray();
+            char[] input = inputunprocessed[0].ToCharArray();
 
-            for (int i = 0; i < input.Length-markersize; i++)
+            for (int i = 0; i < input.Length - markersize; i++)
             {
                 //create and fill subarray of markersize
                 char[] sub = new char[markersize];
@@ -221,7 +304,7 @@ namespace AOC21
 
                 //check for [markersize] distinct values within subarray
                 if (sub.Distinct().Count() == markersize)
-                    return $"Marker found at index {i+markersize}";
+                    return $"Marker found at index {i + markersize}";
 
             }
 
@@ -245,4 +328,7 @@ namespace AOC21
             return Array.ConvertAll(textsplit, s => int.Parse(s));
         }
     }
+
 }
+
+
