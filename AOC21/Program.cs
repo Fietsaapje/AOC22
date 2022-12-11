@@ -37,7 +37,7 @@ namespace AOC21
             Console.WriteLine($"Running time:{ DateTime.Now - before}");
 
             //Day 9
-            input = ReadFileStrings(10);
+            input = ReadFileStrings(9);
             before = DateTime.Now;
             Day9.GetAnswers2(input);
             Console.WriteLine($"Running time:{ DateTime.Now - before}");

@@ -88,18 +88,10 @@ namespace AOC21
             int ropesize = 10;
 
             bool[,] map = new bool[gridsize, gridsize];
+
             (int, int)[] rope = new (int, int)[ropesize];
             for (int i = 0; i < rope.Length; i++)
-            {
                 rope[i].Item1 = rope[i].Item2 = startposition;
-            }
-
-            //(int, int) newheadposition = (startposition, startposition);
-            (int, int) prevsegmentposition = (startposition, startposition);
-            (int, int)[] previousposition = new (int, int)[ropesize];
-            //(int, int) tailposition = (startposition, startposition);
-
-            map[startposition, startposition] = true;
 
             //Perform instruction
             for (int i = 0; i < Instructions.Length; i++)
@@ -108,10 +100,9 @@ namespace AOC21
                 {
                     for (int k = 0; k < rope.Length; k++)
                     {
-                        previousposition[k] = rope[k];
-                        if (k == 0)                       
+                        if (k == 0)
                             switch (Instructions[i].Item1)
-                                {
+                            {
                                 case 'U':
                                     rope[k].Item2++;
                                     break;
@@ -127,26 +118,51 @@ namespace AOC21
                                 default:
                                     //unknown instruction
                                     break;
-                                }
+                            }
                         else
                         {
-                            if (rope[k-1].Item1 - rope[k].Item1 > 1)
-                                rope[k].Item1++;
-                            if (rope[k - 1].Item2 - rope[k].Item2 < 1)
-                                rope[k].Item2--;
-                            if (rope[k - 1].Item1 - rope[k].Item1 < 1)
-                                rope[k].Item1--;
-                            if (rope[k - 1].Item2 - rope[k].Item2 > 1)
-                                rope[k].Item2++;
+                            int difx = rope[k - 1].Item1 - rope[k].Item1;
+                            int dify = rope[k - 1].Item2 - rope[k].Item2;
 
+                            if (difx > 1 || difx < -1)
+                            {
+                                if (difx > 1)
+                                    rope[k].Item1++;
+                                else if (difx < -1)
+                                    rope[k].Item1--;
+
+                                if (dify > 0)
+                                    rope[k].Item2++;
+                                else if (dify < 0)
+                                    rope[k].Item2--;
+                            }
+
+                            difx = rope[k - 1].Item1 - rope[k].Item1;
+                            dify = rope[k - 1].Item2 - rope[k].Item2;
+
+                            if (dify > 1 || dify < -1)
+                            {
+                                if (dify > 1)
+                                    rope[k].Item2++;
+                                else if (dify < -1)
+                                    rope[k].Item2--;
+
+                                if (difx > 0)
+                                    rope[k].Item1++;
+                                else if (difx < 0)
+                                    rope[k].Item1--;
+                            }
                         }
-                        map[rope[k].Item1, rope[k].Item2] = true;
                     }
+
+                    //mark off tail on map
+                    map[rope[rope.Length - 1].Item1, rope[rope.Length - 1].Item2] = true;
 
                 }
 
             }
 
+            //Count all locations
             int locations = 0;
             foreach (var item in map)
             {
